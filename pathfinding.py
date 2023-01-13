@@ -1,5 +1,3 @@
-import math
-
 # algorithm name "A*"
 
 class Node: 
@@ -8,7 +6,7 @@ class Node:
         self.pos_x = pos_x
 
 class Path_node(Node):
-    def __init__(self):
+    def __init__(self, g_cost = 0):
         self.g_cost = g_cost
         # distance to start node according to the path
         # can be calc by adding the prev g_cost of the node it came from + the cost to produce
@@ -22,32 +20,19 @@ class Path_node(Node):
         # combines g_cost with h_cost
     
     def get_h_cost(self, endNode : Node) -> int:
-        # ---Thinking space No real comment here ---
-        # could be implemented by looking at the coords of the two and if you have to change tow values to get
-        # near you add 14
-        # and if you just need to change one value you add 10
-
-        # there is the easy posibility to calc it via some vector math 
-        # by doing vector a minus vector b and calculating the amount (len)
-        # has two down sides 
-        #   - the numbers would not fit in the set sheme of a grid 
-        #   - the sqrt operation is slow
-        #   
-        # positiv:
-        # would be easy to implement xD 
-
-        # abs() --> amount of num
-
-        distance = 0
         """
-        endNode.pos_x
-        endNode.pos_y
+        calculates the distance of the node to the end node
+        without the obstacles
         """
 
-        dist_x = abs(endNode.pos_x - self.pos_x)
-        dist_y = abs(endNode.pos_y - self.pos_y)
+        dist_a = abs(endNode.pos_x - self.pos_x)
+        dist_b = abs(endNode.pos_y - self.pos_y)
         
+        if dist_a < dist_b:
+            dist_a, dist_b = dist_b, dist_a
 
-
+        distance = dist_b * 14 + (dist_a - dist_b) * 10
         
         return distance
+
+# Bastian Lipka
