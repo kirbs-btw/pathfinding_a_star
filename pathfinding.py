@@ -1,39 +1,49 @@
 # algorithm name "A*"
+import numpy
 
 class Grid: 
     def __init__(self, size):
         self.grid = self.initGrid(size)
 
-    def initGrid(self, size) -> list:
-
+    def initGrid(self, size) -> numpy.array:
         grid = []
 
         for i in range(size):
             row = []
             for j in range(size):
-                row.append([j, i])        # append a path_node with the correct coords  
+                row.append(Node(i, j))       
             grid.append(row)
-        return grid
+
+        return numpy.array(grid)
+
+    def positionNode(self, *args) -> None:
+        for node in args:
+            self.grid[node.pos_x][node.pos_y] = node
+        
 
     def print(self) -> None:
         for row in self.grid:
-            print(row)
+            for col in row:
+                print(col)
 
     def __str__(self) -> None:
         return "Size: {}, Items: {}".format(len(self.grid), len(self.grid)**2)
 
-class Obstacle:
-    def __init__(self):
-        pass
-
 class Node: 
-    def __init__(self, pos_y : int, pos_x : int,):
-        self.pos_y = pos_y
+    def __init__(self, pos_x : int, pos_y : int,):
         self.pos_x = pos_x
+        self.pos_y = pos_y
+        
+    def __str__(self) -> str:
+        return "{}, {}".format(self.pos_x, self.pos_y)
 
+class Obstacle(Node):
+    def __init__(self):
+        self.obstacle = True
 
 class Path_node(Node):
-    def __init__(self, endNode : Node, g_cost = None):
+    def __init__(self, pos_x, pos_y, endNode = None, g_cost = None):
+        super().__init__(pos_x, pos_y)
         self.g_cost = g_cost # ist none when started 
         # distance to start node according to the path
         # can be calc by adding the prev g_cost of the node it came from + the cost to produce
@@ -67,8 +77,15 @@ class Path_node(Node):
 
 if __name__ == '__main__':
     field = Grid(5)
-    print(field)
+    
+    start_node = Node(0, 0)
+    end_node = Node(4, 4)
 
+    test = Path_node(3, 1, end_node, 3)
+
+    field.positionNode(start_node, end_node, test)
+
+    field.print()
 
 
 # Bastian Lipka
