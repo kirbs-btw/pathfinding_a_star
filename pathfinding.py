@@ -1,11 +1,11 @@
 # algorithm name "A*"
-import numpy
+import numpy as np 
 
 class Grid: 
     def __init__(self, size):
         self.grid = self.initGrid(size)
 
-    def initGrid(self, size) -> numpy.array:
+    def initGrid(self, size) -> np.array:
         grid = []
 
         for i in range(size):
@@ -14,7 +14,7 @@ class Grid:
                 row.append(Node(i, j))       
             grid.append(row)
 
-        return numpy.array(grid)
+        return np.array(grid)
 
     def positionNode(self, *args) -> None:
         for node in args:
@@ -22,10 +22,11 @@ class Grid:
         
 
     def print(self) -> None:
-        for row in self.grid:
-            for col in row:
-                print(col)
-
+        for i in self.grid:
+            outString = ""
+            for j in i:
+                outString += "{} | ".format(j.getValues())
+            print(outString)
     def __str__(self) -> None:
         return "Size: {}, Items: {}".format(len(self.grid), len(self.grid)**2)
 
@@ -37,9 +38,19 @@ class Node:
     def __str__(self) -> str:
         return "{}, {}".format(self.pos_x, self.pos_y)
 
+    def getValues(self) -> str:
+        return "{}, {}".format(self.pos_x, self.pos_y)
+
 class Obstacle(Node):
-    def __init__(self):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(pos_x, pos_y)
         self.obstacle = True
+
+    def __str__(self) -> str:
+        return "x"
+    
+    def getValues(self) -> str:
+        return "x"
 
 class Path_node(Node):
     def __init__(self, pos_x, pos_y, endNode = None, g_cost = None):
@@ -72,18 +83,66 @@ class Path_node(Node):
         
         return distance
 
-    def __str__(self) -> None:
+    def __str__(self) -> str:
         return f"Pos: [{self.pos_x}, {self.pos_y}], g_cost = {self.g_cost}, h_cost = {self.h_cost}, f_cost = {self.f_cost}"
 
+    def getValues(self) -> str:
+        return f"Pos: [{self.pos_x}, {self.pos_y}], g_cost = {self.g_cost}, h_cost = {self.h_cost}, f_cost = {self.f_cost}"
+
+def a_star(startNode, endNode, field):
+    pass
+
+
+def getSurrounding(node : Node, field : Grid, startNode, endNode) -> list:
+    x = node.pos_x
+    y = node.pos_y
+    
+    # dict of the position around the Node valid or not 
+    positions_around = np.array([
+        [x+1, y+1],
+        [x+1, y],
+        [x+1, y-1],
+        [x, y+1],
+        [x, y-1],
+        [x-1, y+1],
+        [x-1, y],
+        [x-1, y-1]
+    ])
+
+    # filter to filter the valid positions 
+    filter = []
+
+    # checks if the positions are valid 
+    for position in positions_around:
+        try: 
+            if ((position[0] < 0 or position[1] < 0) 
+                or (position[0] == startNode.pos_x and position[1] == startNode.pos_y)
+                or (position[0] == endNode.pos_x and position[1] == endNode.pos_y)): filter.append(False)
+            elif type(field.grid[position[0]][position[1]]) != Obstacle: filter.append(True)
+            else: filter.append(False)
+                
+        except IndexError: filter.append(False)
+    
+    # returns only the valid positions
+    return positions_around[filter]
+
+
 if __name__ == '__main__':
-    field = Grid(5)
+    field = Grid(5)         # init grid with empty nodes
     
     start_node = Node(0, 0)
     end_node = Node(4, 4)
 
-    test = Path_node(3, 1, end_node, 3)
+    test = Node(0, 1)
 
-    field.positionNode(start_node, end_node, test)
+    wall1 = Obstacle(2, 2)
+    wall2 = Obstacle(2, 3)
+    wall3 = Obstacle(2, 1)
+    wall4 = Obstacle(2, 0)
+
+    field.positionNode(start_node, end_node, wall1, wall2, wall3, wall4)
+
+    print(getSurrounding(test, field, start_node, end_node))
 
     field.print()
 
