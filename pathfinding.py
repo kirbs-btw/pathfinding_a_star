@@ -41,16 +41,32 @@ class Node:
     def getValues(self) -> str:
         return "{}, {}".format(self.pos_x, self.pos_y)
 
+class Start_node(Node):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(pos_x, pos_y)
+        self.start = True
+    
+    def getValues(self) -> str:
+        return "s"
+
+class End_node(Node):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(pos_x, pos_y)
+        self.end = True
+    
+    def getValues(self) -> str:
+        return "x"
+
 class Obstacle(Node):
     def __init__(self, pos_x, pos_y):
         super().__init__(pos_x, pos_y)
         self.obstacle = True
 
     def __str__(self) -> str:
-        return "x"
+        return "☐"
     
     def getValues(self) -> str:
-        return "x"
+        return "☐"
 
 class Path_node(Node):
     def __init__(self, pos_x, pos_y, endNode = None, g_cost = None):
@@ -116,11 +132,13 @@ def getSurrounding(node : Node, field : Grid, startNode, endNode) -> list:
     for position in positions_around:
         try: 
             if ((position[0] < 0 or position[1] < 0) 
-                or (position[0] == startNode.pos_x and position[1] == startNode.pos_y)
-                or (position[0] == endNode.pos_x and position[1] == endNode.pos_y)): filter.append(False)
-            elif type(field.grid[position[0]][position[1]]) != Obstacle: filter.append(True)
-            else: filter.append(False)
-                
+                or (type(field.grid[position[0]][position[1]]) == Start_node)
+                or (type(field.grid[position[0]][position[1]]) == End_node)
+                or (type(field.grid[position[0]][position[1]]) == Obstacle)): 
+                filter.append(False)
+
+            else: filter.append(True)
+        
         except IndexError: filter.append(False)
     
     # returns only the valid positions
@@ -130,8 +148,8 @@ def getSurrounding(node : Node, field : Grid, startNode, endNode) -> list:
 if __name__ == '__main__':
     field = Grid(5)         # init grid with empty nodes
     
-    start_node = Node(0, 0)
-    end_node = Node(4, 4)
+    start_node = Start_node(0, 0)
+    end_node = End_node(4, 4)
 
     test = Node(0, 1)
 
