@@ -108,6 +108,9 @@ class Path_node(Node):
 def a_star(startNode, endNode, field):
     pass
 
+def createNode(pos, prevNode):
+    pass
+
 
 def getSurrounding(node : Node, field : Grid, startNode, endNode) -> list:
     x = node.pos_x
