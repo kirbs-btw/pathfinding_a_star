@@ -105,14 +105,51 @@ class Path_node(Node):
     def getValues(self) -> str:
         return f"Pos: [{self.pos_x}, {self.pos_y}], g_cost = {self.g_cost}, h_cost = {self.h_cost}, f_cost = {self.f_cost}"
 
-def a_star(startNode, endNode, field):
+def searchNode(field, searchType):
+    for i in field:
+        for j in field:
+            if type(j) == searchType:
+                return j
+
+def stepCost(coordOne, coordTwo):
+    if coordOne[0] == coordTwo[0] or coordOne[1] == coordOne[1]:
+        return 10
+    return 14
+
+def pickNextNode(field):
     pass
+
+def calcNodes(node, field):
+    round = getSurrounding(node, field)
+
+    for i in round:
+        coordOne = [node.pos_x, node.pos_y]
+        node = Path_node(i[0], i[1], endNode, stepCost(coordOne, i))
+        try:
+            if node.g_cost < field[i[0]][i[1]].g_cost:
+                field[i[0]][i[1]] = node
+        except:
+            field[i[0]][i[1]] = node
+    
+
+
+def a_star(field):
+    startNode = searchNode(field, Start_node)
+    endNode = searchNode(field, End_node)
+
+    calcNodes(startNode, field)
+    
+    
+
+
+
+
 
 def createNode(pos, prevNode):
     pass
 
 
-def getSurrounding(node : Node, field : Grid, startNode, endNode) -> list:
+def getSurrounding(node : Node, field : Grid) -> list:
     x = node.pos_x
     y = node.pos_y
     
