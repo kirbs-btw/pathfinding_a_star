@@ -1,5 +1,7 @@
 # algorithm name "A*"
 import numpy as np 
+import time
+import tkinter as tk
 
 class Grid: 
     def __init__(self, size):
@@ -106,50 +108,103 @@ class Path_node(Node):
         return f"Pos: [{self.pos_x}, {self.pos_y}], g_cost = {self.g_cost}, h_cost = {self.h_cost}, f_cost = {self.f_cost}"
 
 def searchNode(field, searchType):
-    for i in field:
-        for j in field:
-            if type(j) == searchType:
-                return j
-
+    for i in field.grid:
+        for j in i:
+            if searchType == "Start_node":
+                if type(j) == Start_node:
+                    return j
+            elif searchType == "End_node":
+                if type(j) == End_node:
+                    return j
+                
 def stepCost(coordOne, coordTwo):
     if coordOne[0] == coordTwo[0] or coordOne[1] == coordOne[1]:
         return 10
     return 14
 
-def pickNextNode(field):
-    pass
+def pickNextNode(field) -> list:
+
+    for row in field.grid:
+        for i in row:
+            if type(i) == Path_node:
+                point = i
+                break
+
+    for row in field.grid:
+        for i in row:
+            if type(i) == Path_node and i.f_cost < point.f_cost:
+                point = i
+    return point
+
 
 def calcNodes(node, field):
     round = getSurrounding(node, field)
+    endNode = searchNode(field, "End_node")
 
     for i in round:
         coordOne = [node.pos_x, node.pos_y]
         node = Path_node(i[0], i[1], endNode, stepCost(coordOne, i))
         try:
-            if node.g_cost < field[i[0]][i[1]].g_cost:
-                field[i[0]][i[1]] = node
+            if node.g_cost < field.grid[i[0]][i[1]].g_cost:
+                field.grid[i[0]][i[1]] = node
         except:
-            field[i[0]][i[1]] = node
+            field.grid[i[0]][i[1]] = node
     
-
 
 def a_star(field):
-    startNode = searchNode(field, Start_node)
-    endNode = searchNode(field, End_node)
+    ## test
+    root = tk.Tk()
+
+    len = 500
+
+    frame = tk.Frame(root, width=len, height=len)
+    frame.pack()    
+
+    placeBlocks(frame, field)
+
+    
+    ##
+
+
+    startNode = searchNode(field, "Start_node")
+    endNode = searchNode(field, "End_node")
+
 
     calcNodes(startNode, field)
-    
-    
 
+    for _ in range(100):
+        time.sleep(0.5)
+        calcNodes(pickNextNode(field), field)
+        placeBlocks(frame, field)
+        field.print()
 
+    root.mainloop()
 
+def placeBlocks(frame, field):  
+    color = ""
+    for row in field.grid:
+        for object in row:
+            if type(object) != Node:
+                if type(object) == End_node:
+                    color = "#0ff513"
+                elif type(object) == Start_node:
+                    color = "#f50f2e"
+                elif type(object) == Path_node:
+                    color = "#4d5beb"
+                elif type(object) == Obstacle:
+                    color = "#000000"
+
+                block = tk.Frame(frame, bg=color, width=50, height=50)
+                block.place(x = (object.pos_x * 50), y = (object.pos_y * 50))
+    frame.update()
 
 
 def createNode(pos, prevNode):
     pass
 
 
-def getSurrounding(node : Node, field : Grid) -> list:
+def getSurrounding(node, field : Grid) -> list:
+    print(type(node))
     x = node.pos_x
     y = node.pos_y
     
@@ -191,8 +246,6 @@ if __name__ == '__main__':
     start_node = Start_node(0, 0)
     end_node = End_node(4, 4)
 
-    test = Node(0, 1)
-
     wall1 = Obstacle(2, 2)
     wall2 = Obstacle(2, 3)
     wall3 = Obstacle(2, 1)
@@ -200,9 +253,8 @@ if __name__ == '__main__':
 
     field.positionNode(start_node, end_node, wall1, wall2, wall3, wall4)
 
-    print(getSurrounding(test, field, start_node, end_node))
-
     field.print()
 
+    a_star(field)
 
 # Bastian Lipka
