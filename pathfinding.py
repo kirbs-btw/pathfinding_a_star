@@ -71,9 +71,9 @@ class Obstacle(Node):
         return "☐"
 
 class Path_node(Node):
-    def __init__(self, pos_x, pos_y, endNode = None, g_cost = None):
+    def __init__(self, pos_x, pos_y, endNode = None, g_cost = None, step_cost = None):
         super().__init__(pos_x, pos_y)
-        self.g_cost = g_cost # ist none when started 
+        self.g_cost = g_cost + step_cost # ist none when started 
         # distance to start node according to the path
         # can be calc by adding the prev g_cost of the node it came from + the cost to produce
 
@@ -140,10 +140,13 @@ def pickNextNode(field) -> list:
 def calcNodes(node, field):
     round = getSurrounding(node, field)
     endNode = searchNode(field, "End_node")
-
+    if type(node) == Start_node:
+        prev_gCost = 0 
+    else:
+        prev_gCost = node.g_cost
     for i in round:
         coordOne = [node.pos_x, node.pos_y]
-        node = Path_node(i[0], i[1], endNode, stepCost(coordOne, i))
+        node = Path_node(i[0], i[1], endNode, prev_gCost, stepCost(coordOne, i))
         try:
             if node.g_cost < field.grid[i[0]][i[1]].g_cost:
                 field.grid[i[0]][i[1]] = node
@@ -176,7 +179,7 @@ def a_star(field):
         time.sleep(0.5)
         calcNodes(pickNextNode(field), field)
         placeBlocks(frame, field)
-        field.print()
+        # field.print()
 
     root.mainloop()
 
@@ -191,6 +194,12 @@ def placeBlocks(frame, field):
                     color = "#f50f2e"
                 elif type(object) == Path_node:
                     color = "#4d5beb"
+                    block = tk.Frame(frame, bg=color, width=50, height=50)
+                    block.place(x = (object.pos_x * 50), y = (object.pos_y * 50))
+                    label = tk.Label(block, text=f"g: {object.g_cost}\nh: {object.h_cost}\nf: {object.f_cost}")
+                    label.place(relx=0, rely=0, relheight=1, relwidth=1)
+                    continue
+
                 elif type(object) == Obstacle:
                     color = "#000000"
 
@@ -198,13 +207,8 @@ def placeBlocks(frame, field):
                 block.place(x = (object.pos_x * 50), y = (object.pos_y * 50))
     frame.update()
 
-
-def createNode(pos, prevNode):
-    pass
-
-
 def getSurrounding(node, field : Grid) -> list:
-    print(type(node))
+    print(f"working on: {node.getValues()}")
     x = node.pos_x
     y = node.pos_y
     
@@ -231,7 +235,8 @@ def getSurrounding(node, field : Grid) -> list:
                 or (type(field.grid[position[0]][position[1]]) == End_node)
                 or (type(field.grid[position[0]][position[1]]) == Obstacle)): 
                 filter.append(False)
-
+            # elif (type(field.grid[position[0]][position[1]]) == End_node):
+            #   return [position]
             else: filter.append(True)
         
         except IndexError: filter.append(False)
