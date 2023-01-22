@@ -155,6 +155,21 @@ def calcNodes(node, field):
     
 
 def a_star(field):
+    """
+    note:
+    -clean this whole code up.
+    -how do i know if a node has already been checked ?
+        -> checked variable in object ?
+        -> save last check ? 
+    -how do i know that i'm at the end ?
+        -> if node is the only one 
+        -> if node has already been checked ? 
+    
+    
+    """
+
+
+
     ## test
     root = tk.Tk()
 
@@ -167,7 +182,6 @@ def a_star(field):
 
     
     ##
-
 
     startNode = searchNode(field, "Start_node")
     endNode = searchNode(field, "End_node")
