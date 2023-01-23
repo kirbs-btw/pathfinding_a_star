@@ -84,6 +84,7 @@ class Path_node(Node):
         self.f_cost = self.g_cost + self.h_cost
         # a value to indicate the worth 
         # combines g_cost with h_cost
+        self.checked = False
     
     def get_h_cost(self, endNode : Node) -> int:
         """
@@ -126,14 +127,15 @@ def pickNextNode(field) -> list:
 
     for row in field.grid:
         for i in row:
-            if type(i) == Path_node:
+            if type(i) == Path_node and not i.checked:
                 point = i
                 break
 
     for row in field.grid:
         for i in row:
-            if type(i) == Path_node and i.f_cost < point.f_cost:
+            if type(i) == Path_node and i.f_cost < point.f_cost and not i.checked:
                 point = i
+
     return point
 
 
@@ -164,7 +166,9 @@ def a_star(field):
     -how do i know that i'm at the end ?
         -> if node is the only one 
         -> if node has already been checked ? 
-    
+    -how do i backtrack the best path ? 
+        -> saving the prev node in the next ? 
+            --> origin node save ? 
     
     """
 
@@ -191,7 +195,9 @@ def a_star(field):
 
     for _ in range(100):
         time.sleep(0.5)
-        calcNodes(pickNextNode(field), field)
+        currentNode = pickNextNode(field)
+        calcNodes(currentNode, field)
+        field.grid[currentNode.pos_x][currentNode.pos_y].checked = True
         placeBlocks(frame, field)
         # field.print()
 
