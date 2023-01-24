@@ -108,6 +108,11 @@ class Path_node(Node):
     def getValues(self) -> str:
         return f"Pos: [{self.pos_x}, {self.pos_y}], g_cost = {self.g_cost}, h_cost = {self.h_cost}, f_cost = {self.f_cost}"
 
+class runtime:
+    def __init__(self, run = True):
+        self.run = run
+
+
 def searchNode(field, searchType):
     for i in field.grid:
         for j in i:
@@ -139,8 +144,12 @@ def pickNextNode(field) -> list:
     return point
 
 
-def calcNodes(node, field):
+def calcNodes(node, field, run):
     round = getSurrounding(node, field)
+    if type(field.grid[round[0][0]][round[0][1]]) == End_node:
+        run.run = False
+        print("we are at the end")
+
     endNode = searchNode(field, "End_node")
     if type(node) == Start_node:
         prev_gCost = 0 
@@ -156,7 +165,7 @@ def calcNodes(node, field):
             field.grid[i[0]][i[1]] = node
     
 
-def a_star(field):
+def a_star(field, run):
     """
     note:
     -clean this whole code up.
@@ -191,12 +200,12 @@ def a_star(field):
     endNode = searchNode(field, "End_node")
 
 
-    calcNodes(startNode, field)
+    calcNodes(startNode, field, run)
 
-    for _ in range(100):
+    while run:
         time.sleep(0.5)
         currentNode = pickNextNode(field)
-        calcNodes(currentNode, field)
+        calcNodes(currentNode, field, run)
         field.grid[currentNode.pos_x][currentNode.pos_y].checked = True
         placeBlocks(frame, field)
         # field.print()
@@ -252,11 +261,10 @@ def getSurrounding(node, field : Grid) -> list:
         try: 
             if ((position[0] < 0 or position[1] < 0) 
                 or (type(field.grid[position[0]][position[1]]) == Start_node)
-                or (type(field.grid[position[0]][position[1]]) == End_node)
                 or (type(field.grid[position[0]][position[1]]) == Obstacle)): 
                 filter.append(False)
-            # elif (type(field.grid[position[0]][position[1]]) == End_node):
-            #   return [position]
+            elif type(field.grid[position[0]][position[1]]) == End_node:
+                return [position]
             else: filter.append(True)
         
         except IndexError: filter.append(False)
@@ -280,6 +288,8 @@ if __name__ == '__main__':
 
     field.print()
 
-    a_star(field)
+    run = runtime()
+
+    a_star(field, run)
 
 # Bastian Lipka
