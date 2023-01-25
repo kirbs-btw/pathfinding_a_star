@@ -71,7 +71,7 @@ class Obstacle(Node):
         return "☐"
 
 class Path_node(Node):
-    def __init__(self, pos_x, pos_y, endNode = None, g_cost = None, step_cost = None):
+    def __init__(self, pos_x, pos_y, endNode = None, g_cost = None, step_cost = None, origin = None):
         super().__init__(pos_x, pos_y)
         self.g_cost = g_cost + step_cost # ist none when started 
         # distance to start node according to the path
@@ -85,6 +85,10 @@ class Path_node(Node):
         # a value to indicate the worth 
         # combines g_cost with h_cost
         self.checked = False
+        # calls for a check if the node
+        # has already run the process
+        self.origin = origin
+        # saves the origin where the new node comes from
     
     def get_h_cost(self, endNode : Node) -> int:
         """
@@ -107,6 +111,10 @@ class Path_node(Node):
 
     def getValues(self) -> str:
         return f"Pos: [{self.pos_x}, {self.pos_y}], g_cost = {self.g_cost}, h_cost = {self.h_cost}, f_cost = {self.f_cost}"
+
+class Correct_node():
+    def __init__(self):
+        pass
 
 class runtime:
     def __init__(self, run = True):
@@ -149,7 +157,8 @@ def calcNodes(node, field, run):
     if type(field.grid[round[0][0]][round[0][1]]) == End_node:
         run.run = False
         print("we are at the end")
-
+        return node
+ 
     endNode = searchNode(field, "End_node")
     if type(node) == Start_node:
         prev_gCost = 0 
@@ -157,7 +166,7 @@ def calcNodes(node, field, run):
         prev_gCost = node.g_cost
     for i in round:
         coordOne = [node.pos_x, node.pos_y]
-        node = Path_node(i[0], i[1], endNode, prev_gCost, stepCost(coordOne, i))
+        node = Path_node(i[0], i[1], endNode, prev_gCost, stepCost(coordOne, i), node)
         try:
             if node.g_cost < field.grid[i[0]][i[1]].g_cost:
                 field.grid[i[0]][i[1]] = node
@@ -169,12 +178,6 @@ def a_star(field, run):
     """
     note:
     -clean this whole code up.
-    -how do i know if a node has already been checked ?
-        -> checked variable in object ?
-        -> save last check ? 
-    -how do i know that i'm at the end ?
-        -> if node is the only one 
-        -> if node has already been checked ? 
     -how do i backtrack the best path ? 
         -> saving the prev node in the next ? 
             --> origin node save ? 
@@ -202,15 +205,24 @@ def a_star(field, run):
 
     calcNodes(startNode, field, run)
 
-    while run:
+    while run.run:
         time.sleep(0.5)
         currentNode = pickNextNode(field)
-        calcNodes(currentNode, field, run)
+        currentNode = calcNodes(currentNode, field, run)
+        if currentNode != None:
+            backtrack(field, currentNode)
+        
         field.grid[currentNode.pos_x][currentNode.pos_y].checked = True
         placeBlocks(frame, field)
-        # field.print()
 
     root.mainloop()
+
+def backtrack(field, node):
+    while type(node) != Start_node:
+        field.grid[node.pos_x][node.pos_y] = Correct_node()
+        node = node.origin
+        
+
 
 def placeBlocks(frame, field):  
     color = ""
