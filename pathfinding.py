@@ -112,9 +112,9 @@ class Path_node(Node):
     def getValues(self) -> str:
         return f"Pos: [{self.pos_x}, {self.pos_y}], g_cost = {self.g_cost}, h_cost = {self.h_cost}, f_cost = {self.f_cost}"
 
-class Correct_node():
-    def __init__(self):
-        pass
+class Correct_node(Node):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(pos_x, pos_y)
 
 class runtime:
     def __init__(self, run = True):
@@ -154,6 +154,7 @@ def pickNextNode(field) -> list:
 
 def calcNodes(node, field, run):
     round = getSurrounding(node, field)
+    origin = node
     if type(field.grid[round[0][0]][round[0][1]]) == End_node:
         run.run = False
         print("we are at the end")
@@ -166,7 +167,7 @@ def calcNodes(node, field, run):
         prev_gCost = node.g_cost
     for i in round:
         coordOne = [node.pos_x, node.pos_y]
-        node = Path_node(i[0], i[1], endNode, prev_gCost, stepCost(coordOne, i), node)
+        node = Path_node(i[0], i[1], endNode, prev_gCost, stepCost(coordOne, i), origin)
         try:
             if node.g_cost < field.grid[i[0]][i[1]].g_cost:
                 field.grid[i[0]][i[1]] = node
@@ -189,7 +190,7 @@ def a_star(field, run):
     ## test
     root = tk.Tk()
 
-    len = 500
+    len = 350
 
     frame = tk.Frame(root, width=len, height=len)
     frame.pack()    
@@ -206,25 +207,32 @@ def a_star(field, run):
     calcNodes(startNode, field, run)
 
     while run.run:
-        time.sleep(0.5)
+        input("ok")
+        # time.sleep(0.5)
         currentNode = pickNextNode(field)
-        currentNode = calcNodes(currentNode, field, run)
-        if currentNode != None:
-            backtrack(field, currentNode)
+        nextNode = calcNodes(currentNode, field, run)
         
-        field.grid[currentNode.pos_x][currentNode.pos_y].checked = True
+        if nextNode != None:
+            backtrack(field, currentNode)
+        else:
+            field.grid[currentNode.pos_x][currentNode.pos_y].checked = True
+        
+        
         placeBlocks(frame, field)
 
     root.mainloop()
 
 def backtrack(field, node):
     while type(node) != Start_node:
-        field.grid[node.pos_x][node.pos_y] = Correct_node()
+        field.grid[node.pos_x][node.pos_y] = Correct_node(node.pos_x, node.pos_y)
         node = node.origin
         
 
 
 def placeBlocks(frame, field):  
+    for widget in frame.winfo_children():
+        widget.destroy()
+
     color = ""
     for row in field.grid:
         for object in row:
@@ -235,17 +243,18 @@ def placeBlocks(frame, field):
                     color = "#f50f2e"
                 elif type(object) == Path_node:
                     color = "#4d5beb"
-                    block = tk.Frame(frame, bg=color, width=50, height=50)
-                    block.place(x = (object.pos_x * 50), y = (object.pos_y * 50))
-                    label = tk.Label(block, text=f"g: {object.g_cost}\nh: {object.h_cost}\nf: {object.f_cost}")
+                    block = tk.Frame(frame, bg=color, width=70, height=70)
+                    block.place(x = (object.pos_x * 70), y = (object.pos_y * 70))
+                    label = tk.Label(block, text=f"g: {object.g_cost}\nh: {object.h_cost}\nf: {object.f_cost}\n o: {object.origin.pos_x}, {object.origin.pos_y}")
                     label.place(relx=0, rely=0, relheight=1, relwidth=1)
                     continue
-
+                elif type(object) == Correct_node:
+                    color = "#fff111"
                 elif type(object) == Obstacle:
                     color = "#000000"
 
-                block = tk.Frame(frame, bg=color, width=50, height=50)
-                block.place(x = (object.pos_x * 50), y = (object.pos_y * 50))
+                block = tk.Frame(frame, bg=color, width=70, height=70)
+                block.place(x = (object.pos_x * 70), y = (object.pos_y * 70))
     frame.update()
 
 def getSurrounding(node, field : Grid) -> list:
@@ -287,16 +296,33 @@ def getSurrounding(node, field : Grid) -> list:
 
 if __name__ == '__main__':
     field = Grid(5)         # init grid with empty nodes
-    
+    """
     start_node = Start_node(0, 0)
-    end_node = End_node(4, 4)
+    end_node = End_node(3, 0)
 
     wall1 = Obstacle(2, 2)
     wall2 = Obstacle(2, 3)
     wall3 = Obstacle(2, 1)
     wall4 = Obstacle(2, 0)
+    wall5 = Obstacle(3, 3)
 
-    field.positionNode(start_node, end_node, wall1, wall2, wall3, wall4)
+    field.positionNode(start_node, end_node, wall1, wall2, wall3, wall4, wall5)
+    """
+    
+    start_node = Start_node(0, 0)
+    end_node = End_node(4, 4)
+
+    wall1 = Obstacle(0, 1)
+    wall2 = Obstacle(1, 1)
+    wall3 = Obstacle(2, 1)
+    wall4 = Obstacle(3, 1)
+    wall5 = Obstacle(4, 3)
+    wall6 = Obstacle(1, 3)
+    wall7 = Obstacle(2, 3)
+    wall8 = Obstacle(3, 3)
+
+    field.positionNode(start_node, end_node, wall1, wall2, wall3, wall4, wall5, wall6, wall7, wall8)
+    
 
     field.print()
 
