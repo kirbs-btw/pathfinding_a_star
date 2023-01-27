@@ -2,6 +2,7 @@
 import numpy as np 
 import time
 import tkinter as tk
+import random as r
 
 class Grid: 
     def __init__(self, size):
@@ -175,7 +176,7 @@ def calcNodes(node, field, run):
             field.grid[i[0]][i[1]] = node
     
 
-def a_star(field, run):
+def a_star(field, run, blocksize):
     """
     note:
     -clean this whole code up.
@@ -190,12 +191,12 @@ def a_star(field, run):
     ## test
     root = tk.Tk()
 
-    len = 350
+    len = 700
 
     frame = tk.Frame(root, width=len, height=len)
     frame.pack()    
 
-    placeBlocks(frame, field)
+    placeBlocks(frame, field, blocksize)
 
     
     ##
@@ -207,8 +208,8 @@ def a_star(field, run):
     calcNodes(startNode, field, run)
 
     while run.run:
-        input("ok")
-        # time.sleep(0.5)
+        # input("ok")
+        # time.sleep(0.1)
         currentNode = pickNextNode(field)
         nextNode = calcNodes(currentNode, field, run)
         
@@ -218,7 +219,7 @@ def a_star(field, run):
             field.grid[currentNode.pos_x][currentNode.pos_y].checked = True
         
         
-        placeBlocks(frame, field)
+        placeBlocks(frame, field, blocksize)
 
     root.mainloop()
 
@@ -229,7 +230,7 @@ def backtrack(field, node):
         
 
 
-def placeBlocks(frame, field):  
+def placeBlocks(frame, field, blockSize):  
     for widget in frame.winfo_children():
         widget.destroy()
 
@@ -243,8 +244,8 @@ def placeBlocks(frame, field):
                     color = "#f50f2e"
                 elif type(object) == Path_node:
                     color = "#4d5beb"
-                    block = tk.Frame(frame, bg=color, width=70, height=70)
-                    block.place(x = (object.pos_x * 70), y = (object.pos_y * 70))
+                    block = tk.Frame(frame, bg=color, width=blockSize, height=blockSize)
+                    block.place(x = (object.pos_x * blockSize), y = (object.pos_y * blockSize))
                     label = tk.Label(block, text=f"g: {object.g_cost}\nh: {object.h_cost}\nf: {object.f_cost}\n o: {object.origin.pos_x}, {object.origin.pos_y}")
                     label.place(relx=0, rely=0, relheight=1, relwidth=1)
                     continue
@@ -253,8 +254,8 @@ def placeBlocks(frame, field):
                 elif type(object) == Obstacle:
                     color = "#000000"
 
-                block = tk.Frame(frame, bg=color, width=70, height=70)
-                block.place(x = (object.pos_x * 70), y = (object.pos_y * 70))
+                block = tk.Frame(frame, bg=color, width=blockSize, height=blockSize)
+                block.place(x = (object.pos_x * blockSize), y = (object.pos_y * blockSize))
     frame.update()
 
 def getSurrounding(node, field : Grid) -> list:
@@ -293,12 +294,28 @@ def getSurrounding(node, field : Grid) -> list:
     # returns only the valid positions
     return positions_around[filter]
 
+def placeRandomObstacle(field, count, startNode, endNode):
+    for _ in range(count):
+        x = r.randint(0, (len(field.grid) - 1))
+        y = r.randint(0, (len(field.grid) - 1))
+        if (x == startNode.pos_x and y == startNode.pos_y) or (x == endNode.pos_x and y == endNode.pos_y):
+            continue
+        field.grid[x][y] = Obstacle(x, y)
 
 if __name__ == '__main__':
-    field = Grid(5)         # init grid with empty nodes
+    field = Grid(50)         # init grid with empty nodes
+    size = 15
+
+    start_node = Start_node(0, 0)
+    end_node = End_node(45, 40)
+
+    placeRandomObstacle(field, 1000, start_node, end_node)
+
+    field.positionNode(start_node, end_node)
+
     """
     start_node = Start_node(0, 0)
-    end_node = End_node(3, 0)
+    end_node = End_node(45, 40)
 
     wall1 = Obstacle(2, 2)
     wall2 = Obstacle(2, 3)
@@ -308,7 +325,8 @@ if __name__ == '__main__':
 
     field.positionNode(start_node, end_node, wall1, wall2, wall3, wall4, wall5)
     """
-    
+
+    """
     start_node = Start_node(0, 0)
     end_node = End_node(4, 4)
 
@@ -322,12 +340,12 @@ if __name__ == '__main__':
     wall8 = Obstacle(3, 3)
 
     field.positionNode(start_node, end_node, wall1, wall2, wall3, wall4, wall5, wall6, wall7, wall8)
-    
+    """
 
     field.print()
 
     run = runtime()
 
-    a_star(field, run)
+    a_star(field, run, size)
 
 # Bastian Lipka
