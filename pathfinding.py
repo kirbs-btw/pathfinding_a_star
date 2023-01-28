@@ -168,12 +168,17 @@ def calcNodes(node, field, run):
         prev_gCost = node.g_cost
     for i in round:
         coordOne = [node.pos_x, node.pos_y]
-        node = Path_node(i[0], i[1], endNode, prev_gCost, stepCost(coordOne, i), origin)
+        newnode = Path_node(i[0], i[1], endNode, prev_gCost, stepCost(coordOne, i), origin)
         try:
-            if node.g_cost < field.grid[i[0]][i[1]].g_cost:
-                field.grid[i[0]][i[1]] = node
+            print("Node g cost, existing node g cost")
+            print(newnode.g_cost)
+            print(field.grid[i[0]][i[1]].g_cost)
+            if newnode.g_cost < field.grid[i[0]][i[1]].g_cost:
+                field.grid[i[0]][i[1]] = newnode
+                print("change made!")
+            print()
         except:
-            field.grid[i[0]][i[1]] = node
+            field.grid[i[0]][i[1]] = newnode
     
 
 def a_star(field, run, blocksize):
@@ -243,12 +248,14 @@ def placeBlocks(frame, field, blockSize):
                 elif type(object) == Start_node:
                     color = "#f50f2e"
                 elif type(object) == Path_node:
-                    color = "#4d5beb"
+                    color = "#654321"
+                    """
                     block = tk.Frame(frame, bg=color, width=blockSize, height=blockSize)
                     block.place(x = (object.pos_x * blockSize), y = (object.pos_y * blockSize))
                     label = tk.Label(block, text=f"g: {object.g_cost}\nh: {object.h_cost}\nf: {object.f_cost}\n o: {object.origin.pos_x}, {object.origin.pos_y}")
                     label.place(relx=0, rely=0, relheight=1, relwidth=1)
                     continue
+                    """
                 elif type(object) == Correct_node:
                     color = "#fff111"
                 elif type(object) == Obstacle:
@@ -303,13 +310,13 @@ def placeRandomObstacle(field, count, startNode, endNode):
         field.grid[x][y] = Obstacle(x, y)
 
 if __name__ == '__main__':
-    field = Grid(50)         # init grid with empty nodes
-    size = 15
+    field = Grid(30)         # init grid with empty nodes
+    size = 20
 
     start_node = Start_node(0, 0)
-    end_node = End_node(45, 40)
+    end_node = End_node(25, 25)
 
-    placeRandomObstacle(field, 1000, start_node, end_node)
+    placeRandomObstacle(field, 299, start_node, end_node)
 
     field.positionNode(start_node, end_node)
 
@@ -349,3 +356,9 @@ if __name__ == '__main__':
     a_star(field, run, size)
 
 # Bastian Lipka
+
+# problems
+# slow af my code needs so much opt
+# when old blocks are checked again they don't get changed
+# --> the checkt solution is not proper because an old better node does not get checkt again
+# --> existing nodes dont get changed if better option exists
