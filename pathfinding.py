@@ -30,7 +30,7 @@ class Grid:
             for j in i:
                 outString += "{} | ".format(j.getValues())
             print(outString)
-    def __str__(self) -> None:
+    def __str__(self) -> str:
         return "Size: {}, Items: {}".format(len(self.grid), len(self.grid)**2)
 
 class Node: 
@@ -133,7 +133,7 @@ def searchNode(field, searchType):
                     return j
                 
 def stepCost(coordOne, coordTwo):
-    if coordOne[0] == coordTwo[0] or coordOne[1] == coordOne[1]:
+    if coordOne[0] == coordTwo[0] or coordOne[1] == coordTwo[1]:
         return 10
     return 14
 
