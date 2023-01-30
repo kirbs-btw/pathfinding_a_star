@@ -34,12 +34,13 @@ backtrack
 
 """
 
-class Grid:
+class Field:
     def __init__(self, size, startNodePos, endNodePos, obstacles = []):
         self.grid = [[0] * size] * size
         self.endNode = startNodePos # coords of the endNode
         self.startNode = endNodePos # coords of the startNode
         self.obstacles = obstacles # [] list of the positions 
+        self.correctNodes = []
 
     def print(self) -> None:
         for row in self.grid: 
@@ -50,7 +51,7 @@ class Grid:
 
 class Node: 
     def __init__(self, x : int, y : int, origin = [0, 0]):
-        # don't know if needed
+        # don't know if needed 
         self.x = x
         self.y = y
 
@@ -85,7 +86,53 @@ class Node:
             return 10
         return 14
 
+def getSurrounding(node, field):
+    # print(f"working on: {node.getValues()}")
+    x = node.x
+    y = node.y
+    
+    position = [x, y]
+    # dict of the position around the Node valid or not 
+    positions_around = np.array([
+        [x+1, y+1],
+        [x+1, y],
+        [x+1, y-1],
+        [x, y+1],
+        [x, y-1],
+        [x-1, y+1],
+        [x-1, y],
+        [x-1, y-1]
+    ])
+
+    # filter to filter the valid positions 
+    filter = []
+
+    # checks if the positions are valid 
+    for position in positions_around:
+        try: 
+            if ((position[0] < 0 or position[1] < 0) 
+                or (position == field.startNode)
+                or (position in field.obstacles)): 
+                filter.append(False)
+
+            elif position == field.endNode:
+                return [position]
+            else: filter.append(True)
+        
+        except IndexError: filter.append(False)
+    
+    # returns only the valid positions
+    return positions_around[filter]
+
+def a_star(field):
+    pass        
+
+
+
 def main():
+    field = Field(25, startNodePos = [0, 0], endNodePos = [24, 24])
+    
+
     """
     def function
     
