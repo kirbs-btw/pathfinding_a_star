@@ -36,21 +36,44 @@ backtrack
 
 class Field:
     def __init__(self, size, startNodePos, endNodePos, obstacles = []):
-        self.grid = [[0] * size] * size
-        self.endNode = startNodePos # coords of the endNode
-        self.startNode = endNodePos # coords of the startNode
+        self.grid = self.initGrid(size)
+        self.startNode = startNodePos # coords of the endNode
+        self.endNode = endNodePos # coords of the startNode
         self.obstacles = obstacles # [] list of the positions 
         self.correctNodes = []
+
+    def initGrid(self, size):
+        grid = []
+        for i in range(size):
+            arr = []
+            for j in range(size):
+                arr.append(0)
+            grid.append(arr)
+        return grid
 
     def print(self) -> None:
         for row in self.grid: 
             print(row)
 
+    def extraPrint(self):
+        arr = []
+        for row in self.grid:
+            save = []
+            for j in row:
+                if type(j) == Node:
+                    save.append("node")
+                else:
+                    save.append("Free")
+            arr.append(save)
+
+        for i in arr:
+            print(i)
+
     def __str__(self) -> str:
         return "Size: {}, Items: {}".format(len(self.grid), len(self.grid)**2)
 
 class Node: 
-    def __init__(self, x : int, y : int, origin = [0, 0]):
+    def __init__(self, x : int, y : int, endNode, origin = [0, 0], prevG = 0):
         # don't know if needed 
         self.x = x
         self.y = y
@@ -58,12 +81,13 @@ class Node:
         # for backtracking later 
         self.origin = origin
 
-        self.g_cost = self.get_g_cost()
+        self.g_cost = prevG + self.stepCost()
 
         self.h_cost = self.get_h_cost(endNode)
 
-    def get_g_cost(self):
-        return self.origin.g_cost + self.stepCost()
+        self.f_cost = self.g_cost + self.h_cost
+
+        self.checked = False
 
     def get_h_cost(self, endNode) -> int:
         """
@@ -71,8 +95,8 @@ class Node:
         without the obstacles
         """
 
-        dist_a = abs(endNode.x - self.x)
-        dist_b = abs(endNode.y - self.y)
+        dist_a = abs(endNode[0] - self.x)
+        dist_b = abs(endNode[1] - self.y)
         
         if dist_a < dist_b:
             dist_a, dist_b = dist_b, dist_a
@@ -81,19 +105,23 @@ class Node:
         
         return dist
 
-    def stepCost(self, coordOne, coordTwo):
-        if self.x == coordTwo[0] or self.y == coordOne[1]:
+    def stepCost(self):
+        if self.x == self.origin[0] or self.y == self.origin[1]:
             return 10
         return 14
 
+    def getValues(self):
+        return "x:{} y:{} o:{} g:{} h:{} f:{}".format(self.x, self.y, self.origin, self.g_cost, self.h_cost, self.f_cost)
+
+
 def getSurrounding(node, field):
-    # print(f"working on: {node.getValues()}")
+    print(f"working on: {node.getValues()}")
     x = node.x
     y = node.y
     
     position = [x, y]
     # dict of the position around the Node valid or not 
-    positions_around = np.array([
+    positions_around = [
         [x+1, y+1],
         [x+1, y],
         [x+1, y-1],
@@ -102,10 +130,10 @@ def getSurrounding(node, field):
         [x-1, y+1],
         [x-1, y],
         [x-1, y-1]
-    ])
+    ]
 
     # filter to filter the valid positions 
-    filter = []
+    sortedMap = []
 
     # checks if the positions are valid 
     for position in positions_around:
@@ -113,25 +141,71 @@ def getSurrounding(node, field):
             if ((position[0] < 0 or position[1] < 0) 
                 or (position == field.startNode)
                 or (position in field.obstacles)): 
-                filter.append(False)
+                pass
 
+            # ending machanism ???
             elif position == field.endNode:
                 return [position]
-            else: filter.append(True)
         
-        except IndexError: filter.append(False)
+            else: sortedMap.append(position)
+        
+        except IndexError: pass
+
+    return sortedMap
+
+def calcNodes(origin, field):
     
-    # returns only the valid positions
-    return positions_around[filter]
+    round = getSurrounding(origin, field)
+    print(round)
+
+    # ending machanism ??? 
+
+    for i in round:
+        print(i)
+        pathNode = Node(i[0], i[1], field.endNode, origin = [origin.x, origin.y], prevG = origin.g_cost)
+        try:
+            if pathNode.g_cost < field.grid[i[0]][i[1]].g_cost:
+                field.grid[i[0]][i[1]] = pathNode
+                print("nodeChanged")
+        except:
+            field.grid[i[0]][i[1]] = pathNode
+            print("nodeplaced")
+
+def pickNextNode(field) -> list:
+
+    for row in field.grid:
+        for i in row:
+            if type(i) == Node and not i.checked:
+                point = i
+                break
+
+    for row in field.grid:
+        for i in row:
+            if type(i) == Node and i.f_cost < point.f_cost and not i.checked:
+                point = i
+
+    return point
 
 def a_star(field):
-    pass        
+    field.extraPrint()
+    startNode = Node(field.startNode[0], field.startNode[1], field.endNode, [field.startNode[0], field.startNode[1]], 0) # temp
+    startNode.g_cost = 0
+    calcNodes(startNode, field)
+    field.extraPrint()
 
+    while True:
+        currentNode = pickNextNode(field)
+        calcNodes(currentNode, field)
+        currentNode.checked = True
+        field.extraPrint()
 
 
 def main():
-    field = Field(25, startNodePos = [0, 0], endNodePos = [24, 24])
+    field = Field(5, startNodePos = [0, 0], endNodePos = [4, 4])
     
+    field.print()
+     
+    a_star(field)
 
     """
     def function
@@ -144,3 +218,9 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+"""
+need a ending mechanism 
+task for a other day 
+"""
