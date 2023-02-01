@@ -34,6 +34,10 @@ backtrack
 
 """
 
+class Runtime:
+    def __init__(self):
+        self.run = True
+
 class Field:
     def __init__(self, size, startNodePos, endNodePos, obstacles = []):
         self.grid = self.initGrid(size)
@@ -114,7 +118,7 @@ class Node:
         return "x:{} y:{} o:{} g:{} h:{} f:{}".format(self.x, self.y, self.origin, self.g_cost, self.h_cost, self.f_cost)
 
 
-def getSurrounding(node, field):
+def getSurrounding(node, field, run):
     print(f"working on: {node.getValues()}")
     x = node.x
     y = node.y
@@ -142,9 +146,9 @@ def getSurrounding(node, field):
                 or (position == field.startNode)
                 or (position in field.obstacles)): 
                 pass
-
             # ending machanism ???
             elif position == field.endNode:
+                run.run = False
                 return [position]
         
             else: sortedMap.append(position)
@@ -153,9 +157,9 @@ def getSurrounding(node, field):
 
     return sortedMap
 
-def calcNodes(origin, field):
+def calcNodes(origin, field, run):
     
-    round = getSurrounding(origin, field)
+    round = getSurrounding(origin, field, run)
     print(round)
 
     # ending machanism ??? 
@@ -187,17 +191,21 @@ def pickNextNode(field) -> list:
     return point
 
 def a_star(field):
+    run = Runtime()
     field.extraPrint()
     startNode = Node(field.startNode[0], field.startNode[1], field.endNode, [field.startNode[0], field.startNode[1]], 0) # temp
     startNode.g_cost = 0
-    calcNodes(startNode, field)
+    calcNodes(startNode, field, run)
     field.extraPrint()
+    
 
-    while True:
+    while run.run:
         currentNode = pickNextNode(field)
-        calcNodes(currentNode, field)
+        calcNodes(currentNode, field, run)
         currentNode.checked = True
         field.extraPrint()
+
+    # backtrack()
 
 
 def main():
@@ -206,13 +214,6 @@ def main():
     field.print()
      
     a_star(field)
-
-    """
-    def function
-    
-    """
-
-    pass
 
 
 
