@@ -191,6 +191,11 @@ def pickNextNode(field) -> list:
     return point
 
 def a_star(field):
+    root = tk.Tk()
+
+    canvas = tk.Canvas(root, width=1000, height=1000)
+    canvas.pack()
+
     run = Runtime()
     field.extraPrint()
     startNode = Node(field.startNode[0], field.startNode[1], field.endNode, [field.startNode[0], field.startNode[1]], 0) # temp
@@ -200,12 +205,36 @@ def a_star(field):
     
 
     while run.run:
+        time.sleep(0.5)
+        placeCycle(canvas, field)
         currentNode = pickNextNode(field)
         calcNodes(currentNode, field, run)
         currentNode.checked = True
         field.extraPrint()
 
+    root.mainloop()
+
     # backtrack()
+
+def placeCycle(canvas, field):
+    # start and finish placement
+
+    for widget in canvas.winfo_children():
+        widget.destroy()
+
+    startBlock = tk.Canvas(canvas, bg="#3aeb34", height=50, width=50)
+    startBlock.place(x=field.startNode[0] * 50, y = field.startNode[1] * 50)
+
+    endBlock = tk.Canvas(canvas, bg="#eb3434", height=50, width=50)
+    endBlock.place(x=field.endNode[0] * 50, y = field.endNode[1] * 50)
+
+    for row in field.grid:
+        for i in row:
+            if type(i) == Node:
+                pathBlock = tk.Canvas(canvas, bg="#aeeb34", height=50, width=50)
+                pathBlock.place(x=i.x * 50, y = i.y * 50)
+
+    canvas.update()
 
 
 def main():
@@ -222,6 +251,6 @@ if __name__ == '__main__':
 
 
 """
-need a ending mechanism 
-task for a other day 
+backtrack 
+obstacle show
 """
