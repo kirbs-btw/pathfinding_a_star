@@ -231,7 +231,10 @@ def placeCycle(canvas, field):
     for row in field.grid:
         for i in row:
             if type(i) == Node:
+                text = f"g: {i.g_cost}\n h: {i.h_cost}\n f: {i.f_cost}"
                 pathBlock = tk.Canvas(canvas, bg="#aeeb34", height=50, width=50)
+                label = tk.Label(pathBlock, text=text)
+                label.pack()
                 pathBlock.place(x=i.x * 50, y = i.y * 50)
 
     canvas.update()
@@ -243,7 +246,6 @@ def main():
     field.print()
      
     a_star(field)
-
 
 
 if __name__ == '__main__':
