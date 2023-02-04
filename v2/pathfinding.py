@@ -109,7 +109,7 @@ class Node:
         
         return dist
 
-    def stepCost(self):
+    def stepCost(self) -> int:
         if self.x == self.origin[0] or self.y == self.origin[1]:
             return 10
         return 14
@@ -118,7 +118,7 @@ class Node:
         return "x:{} y:{} o:{} g:{} h:{} f:{}".format(self.x, self.y, self.origin, self.g_cost, self.h_cost, self.f_cost)
 
 
-def getSurrounding(node, field, run):
+def getSurrounding(node, field, run) -> list:
     print(f"working on: {node.getValues()}")
     x = node.x
     y = node.y
@@ -157,7 +157,7 @@ def getSurrounding(node, field, run):
 
     return sortedMap
 
-def calcNodes(origin, field, run):
+def calcNodes(origin, field, run) -> None:
     
     round = getSurrounding(origin, field, run)
     print(round)
@@ -190,7 +190,7 @@ def pickNextNode(field) -> list:
 
     return point
 
-def a_star(field):
+def a_star(field) -> None:
     root = tk.Tk()
 
     canvas = tk.Canvas(root, width=1000, height=1000)
@@ -203,6 +203,7 @@ def a_star(field):
     calcNodes(startNode, field, run)
     field.extraPrint()
     
+    save = ""
 
     while run.run:
         time.sleep(0.5)
@@ -211,12 +212,16 @@ def a_star(field):
         calcNodes(currentNode, field, run)
         currentNode.checked = True
         field.extraPrint()
+        save = currentNode
+
+    backTrack(field, save)
+    placeCycle(canvas, field)
 
     root.mainloop()
 
     # backtrack()
 
-def placeCycle(canvas, field):
+def placeCycle(canvas, field) -> None:
     # start and finish placement
 
     for widget in canvas.winfo_children():
@@ -237,7 +242,20 @@ def placeCycle(canvas, field):
                 label.pack()
                 pathBlock.place(x=i.x * 50, y = i.y * 50)
 
+    for i in field.obstacles:
+        obstacle = tk.Canvas(canvas, bg="#000000", height=50, width=50)
+        obstacle.place(x=field.i[0] * 50, y = field.i[1] * 50)
+
+    for i in field.correctNodes:
+        obstacle = tk.Canvas(canvas, bg="#9803fc", height=50, width=50)
+        obstacle.place(x=field.i[0] * 50, y = field.i[1] * 50)
+
     canvas.update()
+
+def backTrack(field, node):
+    while type(field.grid[node.origin[0]][node.origin[1]]) != Node:
+        field.correctNodes.append([node.origin[0]][node.origin[1]])
+        node = node.origin
 
 
 def main():
